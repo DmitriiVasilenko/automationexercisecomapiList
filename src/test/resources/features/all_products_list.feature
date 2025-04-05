@@ -23,25 +23,21 @@ Feature: Verify API response
 
 
 
-#  Scenario Outline: the file structure
-#    Given the API endpoint is "<endpointKey>"
-#    When I send a GET request to the API
-#    Then the structure of the file should be as below
-#
-#    Examples:
-#
-#      | key          | type   | description                 |
-#      | responseCode | number | HTTP response code          |
-#      | products     | array  | An array of product objects |
-#
-#    And the structure of each product should be as below
-#
-#    Examples:
-#
-#      | key      | type   | description                           |
-#      | id       | number | Unique identifier for the product     |
-#      | name     | string | Name of the product                   |
-#      | price    | string | Price in the format of "Rs. <amount>" |
-#      | brand    | string | Brand name                            |
-#      | category | object | Nested category information           |
+  Scenario Outline: the file scheme
+    Given the API endpoint is "<endpointKey>"
+    When I send a GET request to the API
+    Then the scheme should contain "<fieldName>"
+
+
+    Examples:
+      | endpointKey            | fieldName                           |
+      | api.endpoint           | products                            |
+      | api.endpoint           | products.id                         |
+      | api.endpoint           | products.name                       |
+      | api.endpoint           | products.price                      |
+      | api.endpoint           | products.brand                      |
+      | api.endpoint           | products.category                   |
+      | api.endpoint           | products.category.category          |
+      | api.endpoint           | products.category.usertype          |
+      | api.endpoint           | products.category.usertype.usertype |
 

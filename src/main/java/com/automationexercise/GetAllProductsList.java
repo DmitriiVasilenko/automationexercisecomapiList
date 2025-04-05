@@ -6,41 +6,54 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GetAllProductsList {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GetAllProductsList.class);
+    private final ApiClient apiClient;
+
+    public GetAllProductsList(ApiClient apiClient) {
+        this.apiClient = apiClient;
+    }
 
     public static void main(String[] args) {
-        // Validate required endpoints
-        ConfigLoader.validateEndpoints();
+        // Создать экземпляр GetAllProductsList с ApiClient
+        GetAllProductsList getAllProductsList = new GetAllProductsList(new ApiClient());
 
-        // Fetch and log endpoints
+        // Выполнить процесс проверки и запросов
+        getAllProductsList.execute();
+    }
+
+    public void execute() {
+        // Проверка конфигурации
+        validateConfiguration();
+
+        // Получение и логирование эндпоинтов
         String testEndpoint = ConfigLoader.getProperty("test.endpoint");
         String apiEndpoint = ConfigLoader.getProperty("api.endpoint");
 
+        logEndpoints(testEndpoint, apiEndpoint);
+
+        // Отправка GET-запросов и логирование результата
+        sendRequestToEndpoint(testEndpoint);
+        sendRequestToEndpoint(apiEndpoint);
+    }
+
+    private void validateConfiguration() {
+        LOGGER.info("Validating configuration...");
+        ConfigLoader.validateEndpoints();
+    }
+
+    private void logEndpoints(String testEndpoint, String apiEndpoint) {
         LOGGER.info("Test endpoint: {}", testEndpoint);
         LOGGER.info("API endpoint: {}", apiEndpoint);
-
-
-        // Send GET requests to both endpoints and log the responses
-        sendGetRequest(testEndpoint);
-        sendGetRequest(apiEndpoint);
     }
 
-    private static void sendGetRequest(String endpoint) {
+    private void sendRequestToEndpoint(String endpoint) {
         try {
-            handleAndLogResponse(endpoint); // Perform the main operation
-            LOGGER.info("Endpoint accessed successfully: {}", endpoint); // Log if everything went well
+            LOGGER.info("Sending GET request to: {}", endpoint);
+            ApiClient.Response response = apiClient.sendGetRequest(endpoint);
+            LOGGER.info("Response code for endpoint '{}': {}", endpoint, response.getStatusCode());
         } catch (Exception e) {
-            LOGGER.error("Error while sending GET request to {}: {}", endpoint, e); // Log if an error occurs
+            LOGGER.error("Error while sending GET request to {}: {}", endpoint, e.getMessage(), e);
         }
-    }
-
-    private static void handleAndLogResponse(String endpoint) {
-        LOGGER.info("Sending GET request to: {}", endpoint);
-
-        // Call the ApiClient and get the Response object
-        ApiClient.Response apiResponse = ApiClient.sendGetRequest(endpoint);
-
-        // Log the HTTP status code
-        LOGGER.info("Response code for endpoint '{}': {}", endpoint, apiResponse.getStatusCode());
     }
 }
