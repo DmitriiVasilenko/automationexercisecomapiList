@@ -27,17 +27,19 @@ public class GetAllProductsList {
 
     private static void sendGetRequest(String endpoint) {
         try {
-            LOGGER.info("Sending GET request to: {}", endpoint);
-
-            // Call the ApiClient and get the Response object
-            ApiClient.Response apiResponse = ApiClient.sendGetRequest(endpoint);
-
-            // Extract the HTTP status code from the Response object
-            int responseCode = apiResponse.getStatusCode();
-
-            LOGGER.info("Response code for endpoint '{}': {}", endpoint, responseCode);
+            handleAndLogResponse(endpoint);
         } catch (Exception e) {
             LOGGER.error("Error while sending GET request to {}: {}", endpoint, e);
         }
+    }
+
+    private static void handleAndLogResponse(String endpoint) {
+        LOGGER.info("Sending GET request to: {}", endpoint);
+
+        // Call the ApiClient and get the Response object
+        ApiClient.Response apiResponse = ApiClient.sendGetRequest(endpoint);
+
+        // Log the HTTP status code
+        LOGGER.info("Response code for endpoint '{}': {}", endpoint, apiResponse.getStatusCode());
     }
 }
