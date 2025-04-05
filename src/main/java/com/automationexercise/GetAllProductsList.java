@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 
 public class GetAllProductsList {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetAllProductsList.class);
-
     public static void main(String[] args) {
         // Create an instance of GetAllProductsList without ApiClient
         GetAllProductsList getAllProductsList = new GetAllProductsList();

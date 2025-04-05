@@ -31,10 +31,6 @@ public class ApiClient {
             return headers.get(name);
         }
 
-        public Map<String, String> getHeaders() {
-            return headers;
-        }
-
         public String getBody() {
             return body;
         }
