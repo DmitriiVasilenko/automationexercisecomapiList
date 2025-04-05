@@ -46,7 +46,7 @@ public class ApiClient {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
-            // Чтение тела ответа
+            // Reading the response body
             String responseBody;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                 responseBody = reader.lines().collect(Collectors.joining("\n"));
@@ -55,7 +55,7 @@ public class ApiClient {
             int responseCode = connection.getResponseCode();
             Map<String, String> responseHeaders = new HashMap<>();
 
-            // Извлекаем заголовки ответа
+            // Extracting response headers
             connection.getHeaderFields().forEach((key, value) -> {
                 if (key != null && !value.isEmpty()) {
                     responseHeaders.put(key, String.join(", ", value));
@@ -64,7 +64,7 @@ public class ApiClient {
 
             connection.disconnect();
 
-            // Передаём responseBody в третий параметр
+            // Pass responseBody as the third parameter
             return new Response(responseCode, responseHeaders, responseBody);
 
         } catch (IOException e) {

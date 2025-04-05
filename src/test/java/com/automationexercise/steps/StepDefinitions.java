@@ -11,13 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import static org.testng.Assert.assertEquals;
-
 public class StepDefinitions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StepDefinitions.class);
-    private String endpoint; // Переменная для хранения API-ендпоинта
-    private ApiClient.Response lastResponse; // Переменная для хранения ответа API
+    private ApiClient.Response lastResponse; // Variable to store the API response
 
     private String actualEndpoint;
     private int actualResponseCode;
@@ -68,23 +65,23 @@ public class StepDefinitions {
     public void the_scheme_should_contain(String fieldName) {
         LOGGER.info("Validating that the response scheme contains the field: {}", fieldName);
 
-        // Проверяем, есть ли ответ
+        // Check if a response is available
         if (lastResponse == null) {
             throw new IllegalStateException("No response available. Did you send the request?");
         }
 
-        // Получаем тело ответа
+        // Get the response body
         String responseBody = lastResponse.getBody();
 
         try {
-            // Парсим JSON-ответ
+            // Parse the JSON response
             JSONObject jsonResponse = new JSONObject(responseBody);
 
-            // Разделяем fieldName на уровни (products.category.usertype.usertype)
+            // Split the fieldName into levels (e.g., products.category.usertype.usertype)
             String[] fieldPath = fieldName.split("\\.");
             boolean isFieldFound = isFieldPresentInJson(jsonResponse, fieldPath, 0);
 
-            // Если ключ не найден, бросаем ошибку
+            // If the field is not found, throw an error
             if (!isFieldFound) {
                 throw new AssertionError("The field '" + fieldName + "' is missing in the response scheme!");
             }
@@ -95,27 +92,27 @@ public class StepDefinitions {
         }
     }
 
-    // Рекурсивная проверка наличия поля в JSON
+    // Recursive check for the presence of a field in a JSON
     private boolean isFieldPresentInJson(Object json, String[] fieldPath, int index) {
         if (index >= fieldPath.length) {
-            return true; // Мы достигли последнего уровня пути
+            return true; // We have reached the last level of the path
         }
 
         String currentField = fieldPath[index];
 
         if (json instanceof JSONObject jsonObject) {
-            // Если текущий объект JSON содержит нужный ключ, продолжаем проверку
+            // If the current JSON object contains the required key, continue the check
             return jsonObject.has(currentField)
                     && isFieldPresentInJson(jsonObject.get(currentField), fieldPath, index + 1);
         } else if (json instanceof JSONArray jsonArray) {
-            // Если это массив, проверяем все элементы массива
+            // If this is an array, check all items in the array
             for (int i = 0; i < jsonArray.length(); i++) {
                 if (isFieldPresentInJson(jsonArray.get(i), fieldPath, index)) {
-                    return true; // Ключ найден в одном из элементов
+                    return true; // Field found in one of the elements
                 }
             }
         }
 
-        return false; // Ключ не найден
+        return false; // Field not found
     }
 }
