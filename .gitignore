@@ -1,0 +1,38 @@
+# General
+.idea/                                  # IntelliJ IDEA specific settings
+*.iml                                   # IntelliJ IDEA module files
+*.class                                 # Compiled Java files
+*.log                                   # Log files
+*.DS_Store                              # macOS system-specific file
+*.bat                                   # Batch files, optionally, if present
+*.sh                                    # Shell scripts, if present
+*.tmp                                   # Temporary files
+*.swp                                   # Swap files created by editors
+*~                                      # Backup files
+
+# Maven
+target/                                 # Maven build output
+dependency-reduced-pom.xml              # Maven shade plugin POMs
+release.properties                      # Release plugin properties
+.mvn/                                   # Maven wrapper configuration
+
+# Gradle
+.gradle/                                # Gradle internals
+build/                                  # Gradle build output
+!gradle/wrapper/gradle-wrapper.jar      # Exclude wrapper JAR
+gradle-app.setting                      # Gradle App setting(auto)
+
+# Logs and Temp Files
+*.log                                   # Application logs
+log/                                    # Log directories
+logs/                                   # Multiple log folders
+*.out                                   # Log files with .out extensions
+tmp/**                                  # Temporary folders
+
+# Test output
+test-output/                            # TestNG output directories
+.junit/                                 # JUnit output (customized ~test/unit)
+
+<!--
+```plaintext
+ # Database Placeholdere[m
