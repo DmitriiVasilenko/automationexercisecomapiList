@@ -27,9 +27,10 @@ public class GetAllProductsList {
 
     private static void sendGetRequest(String endpoint) {
         try {
-            handleAndLogResponse(endpoint);
+            handleAndLogResponse(endpoint); // Perform the main operation
+            LOGGER.info("Endpoint accessed successfully: {}", endpoint); // Log if everything went well
         } catch (Exception e) {
-            LOGGER.error("Error while sending GET request to {}: {}", endpoint, e);
+            LOGGER.error("Error while sending GET request to {}: {}", endpoint, e); // Log if an error occurs
         }
     }
 
