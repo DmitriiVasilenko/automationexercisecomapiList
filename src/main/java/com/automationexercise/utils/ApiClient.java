@@ -2,6 +2,7 @@ package com.automationexercise.utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class ApiClient {
 
     public static Response sendGetRequest(String endpoint) {
         try {
-            URL url = new URL(endpoint);
+            URL url = URI.create(endpoint).toURL(); // Use URI to avoid deprecation
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
