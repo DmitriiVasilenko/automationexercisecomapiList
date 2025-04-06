@@ -1,4 +1,4 @@
-package com.automationexercise.steps;
+package com.automationexercise.steps.get;
 
 import com.automationexercise.utils.ApiClient;
 import io.cucumber.java.en.Given;
@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import com.automationexercise.utils.JsonStructureValidator;
 
-public class StepDefinitions {
+public class GetAllProductsListStepDefinitions {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StepDefinitions.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetAllProductsListStepDefinitions.class);
     private String endpoint; // Stores the endpoint URL
     private ApiClient.Response response; // Stores the API response
     private JSONObject jsonResponse; // Stores the parsed JSON response
@@ -25,6 +25,7 @@ public class StepDefinitions {
         // Log the endpoint for debugging purposes
         LOGGER.info("Navigating to endpoint: {}", endpoint);
     }
+
 
     @When("User checks the response code")
     public void userChecksTheResponseCode() {

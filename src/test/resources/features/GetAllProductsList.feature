@@ -1,7 +1,8 @@
 Feature: Verify API response
   This feature verifies the API response status and checks the structure of the returned data.
 
-  Scenario Outline: Verify API response code from URL
+  @GetAllProducts
+  Scenario Outline: Get Request Verify API response code from URL
     Given User navigates to "<endpointKey>"
     When User checks the response code
     Then the response code should be <expectedResponseCode>
@@ -10,7 +11,7 @@ Feature: Verify API response
       | endpointKey                                       | expectedResponseCode |
       | https://automationexercise.com/api/productsList   | 200                  |
 
-
+  @GetAllProducts
   Scenario Outline: Verify the content type of the page
     Given User navigates to "<endpointKey>"
     When User checks the contentType
@@ -21,8 +22,8 @@ Feature: Verify API response
       | https://automationexercise.com/api/productsList       | text/html; charset=utf-8  |
 
 
-
-  Scenario Outline: the file scheme
+  @GetAllProducts
+  Scenario Outline: Verify markup
     Given User navigates to "<endpointKey>"
     When User checks markup
     Then markup should contain "<fieldName>"

@@ -36,25 +36,24 @@ public class ApiClient {
     }
 
     public static Response sendRequest(String endpoint, HttpRequest.Builder requestBuilder) {
+        if (endpoint == null || endpoint.isBlank()) {
+            throw new IllegalArgumentException("Endpoint URL cannot be null or blank.");
+        }
         try {
             HttpRequest request = requestBuilder.uri(URI.create(endpoint)).build();
+            HttpResponse<String> httpResponse = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 
-            HttpResponse<String> httpResponse = CLIENT.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
-
-            // Transform headers from Map<String, List<String>> to Map<String, String>
+            // Transform headers to a simplified Map<String, String>
             Map<String, String> simplifiedHeaders = httpResponse.headers().map().entrySet().stream()
                     .collect(Collectors.toMap(
-                            entry -> entry.getKey().toLowerCase(), // Convert keys to lowercase for case-insensitivity
-                            entry -> String.join(", ", entry.getValue()) // Combine all values into a single string
+                            entry -> entry.getKey().toLowerCase(), // Case-insensitive keys
+                            entry -> String.join(", ", entry.getValue()) // Join all values
                     ));
 
             return new Response(
                     httpResponse.statusCode(),
-                    simplifiedHeaders, // Processed headers
-                    httpResponse.body() // Response body
+                    simplifiedHeaders,
+                    httpResponse.body()
             );
 
         } catch (Exception e) {
@@ -65,4 +64,11 @@ public class ApiClient {
     public static Response sendGetRequest(String endpoint) {
         return sendRequest(endpoint, HttpRequest.newBuilder().GET());
     }
+
+    public static Response sendPostRequest(String endpoint, String requestBody) {
+        return sendRequest(endpoint, HttpRequest.newBuilder()
+                .POST(requestBody == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(requestBody))
+                .header("Content-Type", "application/json"));
+    }
+
 }
