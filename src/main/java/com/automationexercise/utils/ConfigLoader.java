@@ -12,30 +12,40 @@ public class ConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoader.class);
     private static final Properties properties = new Properties();
 
+    // Constants for configuration file and keys
+    private static final String CONFIG_FILE = "application.properties";
+    private static final String API_ENDPOINT_KEY = "api.endpoint";
+
+    // Static block to load the configuration file
     static {
-        loadProperties("application.properties");
+        loadProperties();
     }
 
-    private static void loadProperties(String fileName) {
-        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName)) {
-            if (input == null) throw new IllegalStateException("Configuration file not found!");
+    // Loading properties from the configuration file
+    private static void loadProperties() {
+        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
+            if (input == null) {
+                throw new IllegalStateException("Configuration file '" + CONFIG_FILE + "' not found!");
+            }
             properties.load(input);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load configuration file", e);
         }
     }
 
+    // Retrieve the value of a property by key
     public static String getProperty(String key) {
         return properties.getProperty(key);
     }
 
-    // New method to validate required keys
+    // Method to validate the presence of the 'api.endpoint' key
     public static void validateEndpoints() {
-        validateKey("api.endpoint");
+        validateKey(API_ENDPOINT_KEY);
     }
 
+    // Validation for the presence of required key
     private static void validateKey(String key) {
-        String value =  getProperty(key);
+        String value = getProperty(key);
         if (value == null || value.isEmpty()) {
             LOGGER.error("Required endpoint '{}' is not defined in the configuration file!", key);
             throw new IllegalStateException("Endpoint not found or empty for key: " + key);

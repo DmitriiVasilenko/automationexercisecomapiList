@@ -8,15 +8,13 @@ public class JsonStructureValidator {
     public static boolean fieldExists(Object currentObject, String fieldName) {
         String[] fieldParts = fieldName.split("\\.");
         for (String field : fieldParts) {
-            if (currentObject instanceof JSONObject) {
-                JSONObject jsonObject = (JSONObject) currentObject;
+            if (currentObject instanceof JSONObject jsonObject) {
                 if (jsonObject.has(field)) {
                     currentObject = jsonObject.get(field);
                 } else {
                     return false;
                 }
-            } else if (currentObject instanceof JSONArray) {
-                JSONArray jsonArray = (JSONArray) currentObject;
+            } else if (currentObject instanceof JSONArray jsonArray) {
                 boolean fieldFound = false;
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject arrayObject = jsonArray.getJSONObject(i);
