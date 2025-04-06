@@ -1,16 +1,15 @@
 package com.automationexercise.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.util.HashMap;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ApiClient {
+
+    private static final HttpClient CLIENT = HttpClient.newHttpClient(); // Single instance of the HTTP client
 
     public static class Response {
         private final int statusCode;
@@ -27,8 +26,8 @@ public class ApiClient {
             return statusCode;
         }
 
-        public String getHeader(String name) {
-            return headers.get(name);
+        public Map<String, String> getHeaders() {
+            return headers;
         }
 
         public String getBody() {
@@ -36,35 +35,34 @@ public class ApiClient {
         }
     }
 
-    public static Response sendGetRequest(String endpoint) {
+    public static Response sendRequest(String endpoint, HttpRequest.Builder requestBuilder) {
         try {
-            URL url = URI.create(endpoint).toURL();
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            HttpRequest request = requestBuilder.uri(URI.create(endpoint)).build();
 
-            // Reading the response body
-            String responseBody;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                responseBody = reader.lines().collect(Collectors.joining("\n"));
-            }
+            HttpResponse<String> httpResponse = CLIENT.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
 
-            int responseCode = connection.getResponseCode();
-            Map<String, String> responseHeaders = new HashMap<>();
+            // Transform headers from Map<String, List<String>> to Map<String, String>
+            Map<String, String> simplifiedHeaders = httpResponse.headers().map().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> entry.getKey().toLowerCase(), // Convert keys to lowercase for case-insensitivity
+                            entry -> String.join(", ", entry.getValue()) // Combine all values into a single string
+                    ));
 
-            // Extracting response headers
-            connection.getHeaderFields().forEach((key, value) -> {
-                if (key != null && !value.isEmpty()) {
-                    responseHeaders.put(key, String.join(", ", value));
-                }
-            });
+            return new Response(
+                    httpResponse.statusCode(),
+                    simplifiedHeaders, // Processed headers
+                    httpResponse.body() // Response body
+            );
 
-            connection.disconnect();
-
-            // Pass responseBody as the third parameter
-            return new Response(responseCode, responseHeaders, responseBody);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error while sending GET request to " + endpoint, e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while sending request to " + endpoint, e);
         }
+    }
+
+    public static Response sendGetRequest(String endpoint) {
+        return sendRequest(endpoint, HttpRequest.newBuilder().GET());
     }
 }

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class GetAllProductsList {
 
     public static void main(String[] args) {
-        // Create an instance of GetAllProductsList without ApiClient
+        // Create an instance of GetAllProductsList
         GetAllProductsList getAllProductsList = new GetAllProductsList();
 
         // Execute the process of validation and requests
@@ -22,8 +22,11 @@ public class GetAllProductsList {
         // Validate configuration directly from ConfigLoader
         ConfigLoader.validateEndpoints();
 
+        // Retrieve endpoint from configuration file
+        String endpoint = ConfigLoader.getProperty("api.endpoint");
+
         // Call methods directly using the static methods of ApiClient
-        ApiClient.Response response = ApiClient.sendGetRequest("your_endpoint");
+        ApiClient.Response response = ApiClient.sendGetRequest(endpoint);
 
         // Log the received response
         LOGGER.info("Response: {}", response.getBody());

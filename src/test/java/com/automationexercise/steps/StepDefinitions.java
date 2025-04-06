@@ -1,118 +1,104 @@
 package com.automationexercise.steps;
 
 import com.automationexercise.utils.ApiClient;
-import com.automationexercise.utils.ConfigLoader;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.json.JSONArray;
+import io.cucumber.java.en.Then;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import com.automationexercise.utils.JsonStructureValidator;
 
 public class StepDefinitions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StepDefinitions.class);
-    private ApiClient.Response lastResponse; // Variable to store the API response
+    private String endpoint; // Stores the endpoint URL
+    private ApiClient.Response response; // Stores the API response
+    private JSONObject jsonResponse; // Stores the parsed JSON response
 
-    private String actualEndpoint;
-    private int actualResponseCode;
-    private String responseContentType;
+    @Given("User navigates to {string}")
+    public void userNavigatesTo(String endpointKey) {
+        // Set the endpoint from the scenario
+        this.endpoint = endpointKey;
 
-    @Given("the API endpoint is {string}")
-    public void theApiEndpointIs(String endpointKey) {
-        LOGGER.debug("Loading the API endpoint for key: {}", endpointKey);
-        this.actualEndpoint = ConfigLoader.getProperty(endpointKey);
-        if (this.actualEndpoint == null || this.actualEndpoint.isEmpty()) {
-            throw new IllegalStateException("Endpoint not found for key: " + endpointKey);
-        }
-        LOGGER.info("Loaded endpoint: {}", this.actualEndpoint);
+        // Log the endpoint for debugging purposes
+        LOGGER.info("Navigating to endpoint: {}", endpoint);
     }
 
-    @When("I send a GET request to the API")
-    public void iSendAGetRequestToTheApi() {
-        LOGGER.info("Sending GET request to: {}", this.actualEndpoint);
+    @When("User checks the response code")
+    public void userChecksTheResponseCode() {
+        // Send a GET request using ApiClient
+        response = ApiClient.sendGetRequest(endpoint);
 
-        // Send GET request using ApiClient and retrieve detailed Response
-        lastResponse = ApiClient.sendGetRequest(this.actualEndpoint); // FIX: Store response in `lastResponse`
-
-        // Extract and store relevant details from the Response object
-        this.actualResponseCode = lastResponse.getStatusCode();
-        this.responseContentType = lastResponse.getHeader("Content-Type");
-
-        LOGGER.info("Received Response - StatusCode: {}, Content-Type: {}",
-                this.actualResponseCode, this.responseContentType);
+        // Log the response code for debugging purposes
+        LOGGER.info("Response code: {}", response.getStatusCode());
     }
 
     @Then("the response code should be {int}")
-    public void theResponseCodeShouldBe(int expectedResponseCode) {
-        LOGGER.info("Validating response code - Expected: {}, Actual: {}",
-                expectedResponseCode, this.actualResponseCode);
-        Assert.assertEquals(this.actualResponseCode, expectedResponseCode,
-                "Expected and actual response codes do not match!");
+    public void theResponseCodeShouldBe(Integer expectedResponseCode) {
+        // Verify the actual response code matches the expected code using TestNG's Assert
+        Assert.assertEquals(response.getStatusCode(), expectedResponseCode.intValue(),
+                "The response code does not match the expected value!");
+
+        // Log the success message
+        LOGGER.info("Response code verified successfully: {}", response.getStatusCode());
+    }
+
+    @When("User checks the contentType")
+    public void userChecksTheContentType() {
+        // Send a GET request to fetch the response (if not already done)
+        if (response == null) {
+            response = ApiClient.sendGetRequest(endpoint);
+        }
+
+        // Retrieve Content-Type header in case-insensitive manner
+        String contentType = response.getHeaders().get("content-type");
+        LOGGER.info("Content-Type: {}", contentType);
     }
 
     @Then("content-type should be {string}")
     public void contentTypeShouldBe(String expectedContentType) {
-        LOGGER.info("Validating response content-type - Expected: {}, Actual: {}",
-                expectedContentType, this.responseContentType);
-        Assert.assertEquals(this.responseContentType, expectedContentType,
-                "The response content-type does not match!");
+        // Retrieve Content-Type header in case-insensitive manner
+        String actualContentType = response.getHeaders().get("content-type");
+
+        // Verify the content-type matches the expected value
+        Assert.assertEquals(actualContentType, expectedContentType,
+                "The content-type does not match the expected value!");
+
+        // Log the success message
+        LOGGER.info("Content-Type verified successfully: {}", actualContentType);
     }
 
-    @Then("the scheme should contain {string}")
-    public void the_scheme_should_contain(String fieldName) {
-        LOGGER.info("Validating that the response scheme contains the field: {}", fieldName);
-
-        // Check if a response is available
-        if (lastResponse == null) {
-            throw new IllegalStateException("No response available. Did you send the request?");
+    @When("User checks markup")
+    public void userChecksMarkup() {
+        // Send a GET request to fetch the response if not already done
+        if (response == null) {
+            response = ApiClient.sendGetRequest(endpoint);
         }
 
-        // Get the response body
-        String responseBody = lastResponse.getBody();
-
+        // Parse the response body as JSON
         try {
-            // Parse the JSON response
-            JSONObject jsonResponse = new JSONObject(responseBody);
-
-            // Split the fieldName into levels (e.g., products.category.usertype.usertype)
-            String[] fieldPath = fieldName.split("\\.");
-            boolean isFieldFound = isFieldPresentInJson(jsonResponse, fieldPath, 0);
-
-            // If the field is not found, throw an error
-            if (!isFieldFound) {
-                throw new AssertionError("The field '" + fieldName + "' is missing in the response scheme!");
-            }
-
-            LOGGER.info("The field '{}' is present in the response scheme.", fieldName);
+            jsonResponse = new JSONObject(response.getBody());
+            LOGGER.info("Markup parsed successfully");
         } catch (Exception e) {
-            throw new RuntimeException("Failed to process the response body. Error: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to parse response body as JSON", e);
         }
     }
 
-    // Recursive check for the presence of a field in a JSON
-    private boolean isFieldPresentInJson(Object json, String[] fieldPath, int index) {
-        if (index >= fieldPath.length) {
-            return true; // We have reached the last level of the path
-        }
-
-        String currentField = fieldPath[index];
-
-        if (json instanceof JSONObject jsonObject) {
-            // If the current JSON object contains the required key, continue the check
-            return jsonObject.has(currentField)
-                    && isFieldPresentInJson(jsonObject.get(currentField), fieldPath, index + 1);
-        } else if (json instanceof JSONArray jsonArray) {
-            // If this is an array, check all items in the array
-            for (int i = 0; i < jsonArray.length(); i++) {
-                if (isFieldPresentInJson(jsonArray.get(i), fieldPath, index)) {
-                    return true; // Field found in one of the elements
-                }
+    @Then("markup should contain {string}")
+    public void markupShouldContain(String fieldName) {
+        try {
+            if (JsonStructureValidator.fieldExists(jsonResponse, fieldName)) {
+                LOGGER.info("Field '{}' found in the markup", fieldName);
+            } else {
+                Assert.fail("The markup does not contain the field: " + fieldName);
             }
+        } catch (Exception e) {
+            throw new RuntimeException("Error while checking for field: " + fieldName, e);
         }
-
-        return false; // Field not found
     }
+
+
+
 }

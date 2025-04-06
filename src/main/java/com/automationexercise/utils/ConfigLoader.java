@@ -13,11 +13,12 @@ public class ConfigLoader {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream input = ConfigLoader.class.getClassLoader()
-                .getResourceAsStream("application.properties")) {
-            if (input == null) {
-                throw new IllegalStateException("Configuration file not found!");
-            }
+        loadProperties("application.properties");
+    }
+
+    private static void loadProperties(String fileName) {
+        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName)) {
+            if (input == null) throw new IllegalStateException("Configuration file not found!");
             properties.load(input);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load configuration file", e);
@@ -30,12 +31,11 @@ public class ConfigLoader {
 
     // New method to validate required keys
     public static void validateEndpoints() {
-        validateKey("test.endpoint");
         validateKey("api.endpoint");
     }
 
     private static void validateKey(String key) {
-        String value = getProperty(key);
+        String value =  getProperty(key);
         if (value == null || value.isEmpty()) {
             LOGGER.error("Required endpoint '{}' is not defined in the configuration file!", key);
             throw new IllegalStateException("Endpoint not found or empty for key: " + key);
