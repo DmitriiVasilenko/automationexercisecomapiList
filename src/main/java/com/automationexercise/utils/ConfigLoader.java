@@ -40,15 +40,10 @@ public class ConfigLoader {
 
     // Method to validate the presence of the 'api.endpoint' key
     public static void validateEndpoints() {
-        validateKey(API_ENDPOINT_KEY);
-    }
-
-    // Validation for the presence of required key
-    private static void validateKey(String key) {
-        String value = getProperty(key);
+        String value = getProperty(API_ENDPOINT_KEY);
         if (value == null || value.isEmpty()) {
-            LOGGER.error("Required endpoint '{}' is not defined in the configuration file!", key);
-            throw new IllegalStateException("Endpoint not found or empty for key: " + key);
+            LOGGER.error("Required endpoint '{}' is not defined in the configuration file!", API_ENDPOINT_KEY);
+            throw new IllegalStateException("Endpoint not found or empty for key: " + API_ENDPOINT_KEY);
         }
     }
 }
