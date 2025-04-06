@@ -11,26 +11,25 @@ import org.testng.Assert;
 public class PostAllProductsListStepDefinitions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostAllProductsListStepDefinitions.class);
-    private String endpoint; // Stores the endpoint URL
-    private ApiClient.Response response; // Stores the API response
+    private ApiClient.Response response; // Field retained to share data between steps
 
     @Given("User sends POST request to {string}")
     public void userSendsPostRequestTo(String endpointKey) {
-        // Логируем полученное значение endpointKey
+        // Log the received endpointKey
         LOGGER.info("Received endpointKey: {}", endpointKey);
 
-        // Проверяем корректность переданного URL
+        // Validate the provided URL
         if (endpointKey == null || endpointKey.isBlank()) {
             LOGGER.error("Invalid endpoint key: null or blank.");
             throw new IllegalArgumentException("Endpoint key cannot be null or blank.");
         }
 
-        // Устанавливаем значение endpoint
-        this.endpoint = endpointKey;
+        // Use a local variable for the endpoint
+        String endpoint = endpointKey;
 
-        // Отправляем POST-запрос
+        // Send the POST request
         try {
-            response = ApiClient.sendPostRequest(endpoint, null); // Отправка без тела запроса
+            response = ApiClient.sendPostRequest(endpoint, null); // Save response for subsequent steps
             LOGGER.info("POST request to {} returned status code: {}", endpoint, response.getStatusCode());
         } catch (Exception e) {
             LOGGER.error("Failed to send POST request to {}: {}", endpoint, e.getMessage());
@@ -40,23 +39,23 @@ public class PostAllProductsListStepDefinitions {
 
     @When("User checks the response code of post")
     public void userChecksTheResponseCodeOfPost() {
-        // Проверяем наличие ответа
+        // Verify that a response is available
         if (response == null) {
             LOGGER.error("Response is null. Ensure a POST request was sent.");
             throw new IllegalStateException("No response available to check.");
         }
 
-        // Логируем код ответа
+        // Log the response code
         LOGGER.info("Response code of POST request: {}", response.getStatusCode());
     }
 
     @Then("the response code of post should be {int}")
     public void theResponseCodeOfPostShouldBe(Integer expectedResponseCode) {
-        // Проверяем код ответа на соответствие ожидаемому значению
+        // Compare the actual response code with the expected value
         Assert.assertEquals(response.getStatusCode(), expectedResponseCode.intValue(),
                 "The response code does not match the expected value!");
 
-        // Логируем успешное совпадение кода
+        // Log successful code match
         LOGGER.info("POST response code verified successfully: {}", response.getStatusCode());
     }
 }
