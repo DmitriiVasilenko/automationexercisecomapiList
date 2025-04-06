@@ -24,15 +24,12 @@ public class PostAllProductsListStepDefinitions {
             throw new IllegalArgumentException("Endpoint key cannot be null or blank.");
         }
 
-        // Use a local variable for the endpoint
-        String endpoint = endpointKey;
-
         // Send the POST request
         try {
-            response = ApiClient.sendPostRequest(endpoint, null); // Save response for subsequent steps
-            LOGGER.info("POST request to {} returned status code: {}", endpoint, response.getStatusCode());
+            response = ApiClient.sendPostRequest(endpointKey, null); // Use endpointKey directly
+            LOGGER.info("POST request to {} returned status code: {}", endpointKey, response.getStatusCode());
         } catch (Exception e) {
-            LOGGER.error("Failed to send POST request to {}: {}", endpoint, e.getMessage());
+            LOGGER.error("Failed to send POST request to {}: {}", endpointKey, e.getMessage());
             throw new RuntimeException("POST request failed.", e);
         }
     }
